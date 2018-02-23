@@ -144,6 +144,6 @@ wss.on('connection', function connection(ws, req) {
   
 });
 
-server.listen(443, function listening() {
-  console.log('Start server 443');
+server.listen(8080, function listening() {
+  console.log('Start server 8080');
 });
