@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+	<head>
+            <title>Push Server</title>
+	</head>
+<body>
+<h1>Active connect:  <%=listConnect.length %></h1>
+
+<table style="width:100%">
+<thead>
+<tr>
+    <td>
+       SID     
+    </td>
+    <td>
+       Start     
+    </td>
+    <td>
+       UserID     
+    </td>
+    <td>
+       UserName     
+    </td>
+    <td>
+       UserGroup     
+    </td>
+</tr>
+</thead>
+<tbody>
+<% for (var i=0; i < listConnect.length; i++) { %>
+
+<tr>
+    <td>
+       <%=listConnect[i].info.SID %>     
+    </td>
+    <td>
+       <%=listConnect[i].info.Start %>
+    </td>
+    <td>
+       <%=listConnect[i].info.UserID %>
+    </td>
+    <td>
+       <%=listConnect[i].info.UserName %>
+    </td>
+    <td>
+       <%=listConnect[i].info.UserGroup %>    
+    </td>
+</tr>
+
+
+<%}%>
+
+</tbody>
+</table>
+</body>
+</html>

@@ -3,9 +3,17 @@ const http = require('http');
 const url = require('url');
 const WebSocket = require('ws');
 
+
 const app = express();
+app.set('views', './views');
+app.set('view engine', 'ejs');
+
+
+
+
 var listConnect = [];
 var connectionIDCounter = 0;
+var port = process.env.PORT || 8080;
 
 
 function sendObj(message)
@@ -33,11 +41,14 @@ function sendMessage(to, message)
 }
 
 app.use(function (req, res) {
-  res.send("Push Server");
+  res.render('index', {listConnect : listConnect});
 });
 
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server: server  });
+const wss = new WebSocket.Server({ server: server,
+                                   clientNoContextTakeover: true,
+                                   serverNoContextTakeover: true
+});
 
 
 
@@ -144,6 +155,6 @@ wss.on('connection', function connection(ws, req) {
   
 });
 
-server.listen(8080, function listening() {
-  console.log('Start server 8080');
+server.listen(port, function listening() {
+  console.log('Start server:' + port.toString());
 });
