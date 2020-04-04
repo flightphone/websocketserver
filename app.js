@@ -16,7 +16,7 @@ app.set('view engine', 'ejs');
 var listConnect = [];
 var connectionIDCounter = 0;
 
-var port = process.env.PORT || 8080;
+var port = process.env.PORT || 7500;
 
 
 function sendObj(message) {
