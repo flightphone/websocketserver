@@ -39,8 +39,7 @@ function sendMessage(to, message, from) {
     for (var i = 0; i < listConnect.length; i++) {
         if (i < 0)
             break;
-        if (to == 'all' || to == listConnect[i].info.UserID || to == listConnect[i].info.UserName || to == listConnect[i].info.UserGroup)
-        {
+        if (to == 'all' || to == listConnect[i].info.UserID || to == listConnect[i].info.UserName || to == listConnect[i].info.UserGroup) {
             try {
                 listConnect[i].send(message);
             }
@@ -48,25 +47,23 @@ function sendMessage(to, message, from) {
                 listConnect.splice(i, 1);
                 i--;
             }
-            
-            if (to == listConnect[i].info.UserID || to == listConnect[i].info.UserName)
-            {
-                
-                for (var j = 0; j < listConnect.length; j++)
-                {
+
+            if (to == listConnect[i].info.UserID || to == listConnect[i].info.UserName) {
+
+                for (var j = 0; j < listConnect.length; j++) {
                     if (listConnect[j].info.UserID == from)
-                    try {
-                        listConnect[j].send(message);
-                    }
-                    catch (err) {
-                        
-                    }
+                        try {
+                            listConnect[j].send(message);
+                        }
+                        catch (err) {
+
+                        }
 
                 }
             }
-            
 
-        }    
+
+        }
     }
 
 }
