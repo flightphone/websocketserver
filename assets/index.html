@@ -1,0 +1,518 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+	<script src="Scripts/jquery.min.js"></script>
+	<script src="Scripts/jquery.mobile-1.4.5.min.js"></script>
+	<script src="Scripts/adapter-latest.js"></script>
+	<link rel="stylesheet" href="Scripts/jquery.mobile-1.4.5.min.css"/>
+	<!--<link rel="stylesheet" href="Scripts/bootstrap.min.css"/>-->
+	
+	 <!--Во весь экран для Android-->
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <style>
+            
+
+            .botQuery {
+                background: #007E3E; /* Цвет фона */
+                color: #fff; /* Цвет текста */
+                padding: 10px; /* Поля вокруг текста */
+                border-radius: 10px; /* Уголки */
+            }
+
+            .botRespon {
+                background: White; /* Цвет фона */
+                color: Black; /* Цвет текста */
+                padding: 10px; /* Поля вокруг текста */
+                border-radius: 10px; /* Уголки */
+            }
+
+			.row_b {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap;
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+
+.col_b {
+  -webkit-flex-basis: 0;
+      -ms-flex-preferred-size: 0;
+          flex-basis: 0;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  max-width: 100%;
+}
+            
+.col-md-auto_b {
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 0 auto;
+        -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
+    width: auto;
+  }			
+        </style>
+
+
+	<script>
+	
+	function find_click(data)
+	{
+	
+	
+	
+	
+	    var find = $('#AR_Find').val();
+	    $('#AR_Find').val('');
+        var findobj = { type : "message",
+					to: $('#toadress').val(),
+					from: UserID,
+					fromName: $('#UserName').val(),
+					//subject: "chat",
+					body: find
+			    };
+        
+		if (data)
+		{
+			
+			
+			//findobj.img = data;
+			//var findstr = JSON.stringify(findobj);
+			//parseRespon(findstr);
+			
+			var form = new FormData();
+		    form.append("image", data);
+			form.append("album", "CIQ7Vw9hhaKZpwV");
+			
+
+var settings = {
+  "async": true,
+  "crossDomain": true,
+  "url": "https://api.imgur.com/3/image",
+  "method": "POST",
+  "headers": {
+    "authorization": "Client-ID 4bcdb929e713d10"
+  },
+  "processData": false,
+  "contentType": false,
+  "mimeType": "multipart/form-data",
+  "data": form
+}
+
+$.ajax(settings).done(function (msg) {
+  	var imgobj = JSON.parse(msg);
+	findobj.img = imgobj.data.link;
+	var findstr = JSON.stringify(findobj);
+	socket.send(findstr);
+	
+});
+			
+		}
+		else
+		{
+			var findstr = JSON.stringify(findobj);
+			socket.send(findstr);
+		}	
+	}
+
+	
+	function send_image(data)
+	{
+	    find_click(data);
+	}
+	
+	function show_mymessage(msg)
+	{
+		var body = $('#divMes').html();
+	    body = '<p style="text-align:right"><span class="botQuery">' + msg + '</span></p>' + body;
+	    $('#divMes').html(body);
+	}
+	
+	function show_result(msg)
+	{
+            if (!isShow)
+                return;
+	    var text = msg;
+	    $('#AR_Find').focus();
+	    window.scrollTo(0, 0);
+        text = '<pre>' + text + '</pre>';
+        show_html(text);
+    
+	}
+	
+	function show_html(msg)
+	{
+	    var body = $('#divMes').html();
+	    body = '<p><div  class = "botRespon">' + msg + '</div></p>' + body;
+	    $('#divMes').html(body);
+	}
+
+	
+	
+	
+    function parseRespon(msg)
+	{
+	  if (!msg)
+	    return;
+	    
+	  var objmsg = JSON.parse(msg);
+	  //if (objmsg.type != 'message')
+	  //	return;
+		
+	  var body = '';
+	  
+	  if (!objmsg.body)
+            body = objmsg.message;
+          else
+            body =  objmsg.body;
+	  
+	  var from = '';
+	  if (objmsg.from)
+	     from = objmsg.from;
+	  else
+	     from =  '?';
+	     
+	  
+	  var fromName = '';
+	  if (objmsg.fromName)
+	     fromName = objmsg.fromName;
+	  else
+	     fromName =  '?';
+	  
+	  window.scrollTo(0, 0);
+	  
+	  if (from == UserID)
+	  {
+		if (objmsg.img!=null)
+		{
+			body = body + '<p style="text-align:center"><img src="' + objmsg.img + '" style="width:90%"/></p>'
+		}
+		show_mymessage(body);
+		$("#sound1")[0].play();
+	  }
+	  else
+	  {
+	    body = '<b>' + fromName + ': </b>' + body;
+		if (objmsg.img!=null)
+		{
+			body = body + '<p style="text-align:center"><img src="' + objmsg.img + '" style="width:90%"/></p>'
+		}
+		show_html(body);
+		$("#sound2")[0].play();
+	  }
+	  
+	 
+	}
+	
+	var socket;
+	var UserID = 'User' + Math.random().toString();
+	var timerId;
+	var isShow = true;
+	
+	//var wshost = 'ws://websocketserver.fr.openode.io/:80';
+	var wshost = 'ws://' + window.location.host;
+	
+	//var wshost = 'ws://websocketserver.eu-4.evennode.com/:80';
+	var initsend = '{"type":"auth","UserGroup":"chat"}';
+	var toadress = 'chat';
+	
+	
+	//var wshost = 'ws://achex.ca:4010';
+	//var wshost = 'ws://192.168.56.101:443';
+	//var wshost = 'wss://echo.websocket.org';
+	
+	
+	
+	
+	
+	function restart_socket()
+	{
+	   if (socket.readyState === WebSocket.CLOSED)
+	   {
+		//socket = null;
+			start_socket();
+	   }	
+	}
+	
+	
+	
+	
+	function start_socket()
+	{
+		
+		socket = new WebSocket(wshost);
+		socket.onopen = function() {
+                                try
+                                {
+                                    clearInterval(timerId);
+                                }
+                                catch(e)
+                                {;}
+                                isShow = true;
+                                getInit();
+				socket.send(initsend);
+				show_result("Соединение установлено.");
+		};
+
+		socket.onclose = function(event) {
+			if (event.wasClean) {
+					show_result('Соединение закрыто чисто');
+			} else {
+					show_result('Обрыв соединения'); // например, "убит" процесс сервера
+					if (isShow)
+                                            $("#sound2")[0].play();
+					}
+			//show_result('Код: ' + event.code + ' причина: ' + event.reason);
+			isShow = false;
+			timerId = setTimeout(restart_socket, 5000);
+		};
+
+		socket.onmessage = function(event) {
+			parseRespon(event.data);
+		};
+
+		socket.onerror = function(error) {
+			show_result("Ошибка " + error.message);
+		};
+	}
+
+    
+        function getInit()
+        {
+                var findobj = { type : "auth",
+					UserID: $('#UserID').val(),
+					UserName: $('#UserName').val(),
+					UserGroup: $('#UserGroup').val()
+			    };
+		initsend = JSON.stringify(findobj);
+        
+        }
+        
+	function setTitle()
+	{
+		var str = 'Общий канал (' + $('#UserName').val() + ')';
+		$('#htitle').text(str);
+		
+		getInit();
+		if (isShow)
+                    socket.send(initsend);
+	}
+//=========================================================Фото================================================
+
+
+var video; 
+var MediaStream;
+
+function startCamera()
+{
+    video = document.getElementById('video');
+	$(":mobile-pagecontainer").pagecontainer( "change", $("#videopage" ));
+
+	navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false })
+    .then(function(stream) {
+    	MediaStream = stream;
+        video.srcObject = stream;
+        //video.play();
+    })
+    .catch(function(err) {
+        alert("An error occured! " + err);
+    });
+}
+
+function stopCamera()
+    {
+    	video.pause();
+    	
+    	
+    	//Рисуем картинку
+    	 canvas = document.getElementById('canvas');
+    	 var width = video.videoWidth;
+    	 var height = video.videoHeight;
+    	
+          var context = canvas.getContext('2d');
+          canvas.width = width;
+    	  canvas.height = height;
+      	  context.drawImage(video, 0, 0, width, height);
+          var data = canvas.toDataURL('image/png');
+		  data = data.replace(/^data:image\/(png|jpg);base64,/, '');
+		  MediaStream.getVideoTracks()[0].stop();
+    	  $(":mobile-pagecontainer").pagecontainer( "change", $("#mainpage" ));
+    	  send_image(data);
+    }
+
+	function cancelCamera()
+    {
+    	//video.pause();
+    	//MediaStream.stop();
+    	if (MediaStream != null)
+    		MediaStream.getVideoTracks()[0].stop();
+    	$(":mobile-pagecontainer").pagecontainer( "change", $("#mainpage" ));
+    	
+    }
+	
+	//====================================================================Foto===========================================================
+	
+	
+	//====================================================================File===========================================================
+	
+	function handleFiles(files) {
+		if (!files.length) 
+			return;	
+		//var data = URL.createObjectURL(files[0]);
+		//$('#AR_Find').val(files[0].name);
+		/*
+		var image = new Image();
+
+		image.onload = function () {
+				var canvas = document.createElement('canvas');
+				canvas.width = this.naturalWidth; // or 'width' if you want a special/scaled size
+				canvas.height = this.naturalHeight; // or 'height' if you want a special/scaled size
+				canvas.getContext('2d').drawImage(this, 0, 0);
+				send_image(canvas.toDataURL('image/png'));
+    };
+
+		image.src = data;
+		*/
+		//send_image(data);
+		send_image(files[0]);
+		
+    }
+	
+	function fileClick()
+	{
+		$('#fileElem').click();
+	}
+	
+	
+	function delete_message()
+	{
+		$('#divMes').html('');
+	}
+	//===================================================================================================================================
+	</script>
+	</head>
+	<body>
+	
+        
+     
+
+	<div data-role="page" style="background-color:lightgray" id="mainpage">
+  		<div data-role="header" data-position="fixed">
+           <h1 id="htitle">Общий канал</h1>
+		
+		<div class="row_b">
+                        <div class="col-md-auto_b">
+                                <a href="#" data-role="button" data-icon="comment"  onclick="find_click('')">Отправить</a>
+                        </div> 
+			<div class="col_b">
+				<input type="text"  id="AR_Find"/>
+			</div>
+		<input type="file" id="fileElem" accept="image/*" style="display:none" onchange="handleFiles(this.files)">
+		</div>
+		
+		
+		<div class="row_b">
+		<div class="col-md-auto_b">
+			<a href="#" data-role="button">Кому:</a>
+		</div> 
+		<div class="col_b">
+				<input type="text"  id="toadress" value="chat"/>
+		</div>
+		</div>
+		
+		
+		
+		
+		<div data-role="navbar">
+		<ul>
+			<li><a href="#setting" data-icon="user">Имя,группа</a></li>
+			<!--<li><a href="#" data-icon="camera" onclick="startCamera()">Фото</a></li>-->
+			<li><a href="#" data-icon="camera" onclick="fileClick()">Картинка</a></li>
+			<li><a href="#" data-icon="delete" onclick="delete_message()">Очистить</a></li>
+			<!--<li><a href="http://uploads.im" data-icon="cloud">Фото Hosting</a></li>-->
+			
+			
+		</ul>
+		</div>
+  		</div>
+
+  		<div data-role="content" id="divMes" >
+             
+			 
+			 
+  		</div>
+	</div> 
+	
+	<div data-role="page" style="background-color:lightgray" id="setting">
+  		<div data-role="header" data-position="fixed">
+                <h1 >Введите Ваше имя</h1>
+		</div>   
+  		<div data-role="content">
+		   <div data-role="fieldcontain">
+				<label for="UserID">Телефон:</label>
+				<input type="text" name="UserID" id="UserID" value="">   
+				
+				<label for="UserName">Ваше имя:</label>
+				<input type="text" name="UserName" id="UserName" value="anonymous">    
+				
+				<label for="UserName">Группа:</label>
+				<input type="text" name="UserGroup" id="UserGroup" value="chat">       
+				
+			</div>
+			<div>
+    		Входящие:</br>
+			<audio id="sound2" preload="auto" controls>
+            		<source src="Content/sms1.mp3" type="audio/mpeg">
+    		</audio>
+    		</div>
+			<div>
+			Исходящие:</br>
+			<audio id="sound1" preload="auto" controls>
+            	<source src="Content/button-mp3.mp3" type="audio/mpeg">
+    		</audio>
+    		</div>
+			<a href="#mainpage" data-icon="check" data-role="button" data-inline="true" onclick="setTitle()">ОК</a>
+  		</div>
+	</div> 
+	
+	
+	<div data-role="page" id="videopage">
+	
+	<div data-role="footer" data-position="fixed">
+		<h1>Фото</h1>
+			<a href="#" data-role="button" class="ui-btn-left" data-icon="arrow-l" onclick="cancelCamera()">Назад</a>
+			<a href="#" data-role="button" class="ui-btn-right" data-icon="camera" onclick="stopCamera()">Фото</a>
+	</div>
+	
+	
+	<div data-role="content">
+    	<video id="video" autoplay style="width:100%">Video stream not available.</video>
+  	</div>
+	</div>
+	
+	<div data-role="page" id="canvaspage">
+	<canvas id="canvas">
+  	</canvas>	
+  	</div>
+
+	
+			
+	<script>
+				$('#UserID').val(UserID);
+				
+				
+		start_socket();	
+		//setTitle();
+	</script>
+	</body>
+	
+</html>
